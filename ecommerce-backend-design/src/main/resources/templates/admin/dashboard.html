@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard — ShopWave</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+  <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+  <main class="container">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:16px;">
+      <div>
+        <h1 class="section-title" style="margin-bottom:4px;">Admin Dashboard</h1>
+        <p style="color:var(--text-muted); font-size:0.9rem;">Manage your product catalogue</p>
+      </div>
+      <a href="/admin/products/new" class="btn-primary">+ Add Product</a>
+    </div>
+
+    <!-- Flash messages -->
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="admin-stat-card">
+        <div class="admin-stat-value" th:text="${totalProducts}">0</div>
+        <div class="admin-stat-label">Total Products</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-value" th:text="${#lists.size(categories)}">0</div>
+        <div class="admin-stat-label">Categories</div>
+      </div>
+    </div>
+
+    <!-- Recent Products Table -->
+    <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;">
+      <div style="padding:18px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="font-family:'Syne',sans-serif; font-size:1rem;">Recent Products</h3>
+        <a href="/products" style="font-size:0.85rem; color:var(--accent);">View storefront →</a>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="product : ${recentProducts}">
+              <td>
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/placeholder.png'}"
+                       style="width:44px; height:44px; border-radius:8px; object-fit:cover; border:1px solid var(--border);"
+                       th:alt="${product.name}"/>
+                  <div>
+                    <div style="font-weight:600; font-size:0.9rem;" th:text="${product.name}"></div>
+                    <div style="font-size:0.75rem; color:var(--text-muted);"
+                         th:text="${#temporals.format(product.createdAt, 'dd MMM yyyy')}"></div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="product-category" th:text="${product.category}"></span></td>
+              <td style="font-weight:700; color:var(--accent);"
+                  th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}"></td>
+              <td>
+                <span th:class="${product.inStock ? 'stock-badge in-stock' : 'stock-badge out-stock'}"
+                      th:text="${product.stock}"></span>
+              </td>
+              <td>
+                <div style="display:flex; gap:8px; align-items:center;">
+                  <a th:href="@{/admin/products/edit/{id}(id=${product.id})}" class="btn-secondary"
+                     style="padding:6px 12px; font-size:0.82rem;">Edit</a>
+                  <form th:action="@{/admin/products/delete/{id}(id=${product.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn-danger confirm-delete"
+                            style="padding:6px 12px; font-size:0.82rem;">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

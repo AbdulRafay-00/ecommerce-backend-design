@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<nav th:fragment="navbar" class="navbar">
+  <div class="nav-container">
+    <a href="/" class="nav-brand">
+      <span class="brand-icon">🛍</span>
+      <span>ShopWave</span>
+    </a>
+
+    <form class="nav-search" th:action="@{/search}" method="get">
+      <input type="text" name="query" placeholder="Search products..." class="search-input"
+             th:value="${searchQuery}"/>
+      <button type="submit" class="search-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+        </svg>
+      </button>
+    </form>
+
+    <div class="nav-links">
+      <a href="/products" class="nav-link">Products</a>
+
+      <!-- Not logged in -->
+      <div sec:authorize="!isAuthenticated()" class="nav-auth">
+        <a href="/auth/login" class="nav-link">Login</a>
+        <a href="/auth/signup" class="btn-primary-sm">Sign Up</a>
+      </div>
+
+      <!-- Logged in as USER -->
+      <div sec:authorize="isAuthenticated()" class="nav-user">
+        <span sec:authorize="hasRole('ADMIN')" class="admin-badge">
+          <a href="/admin" class="nav-link">⚙ Admin</a>
+        </span>
+        <span class="user-greeting" sec:authentication="name"></span>
+        <a href="/auth/logout" class="nav-link logout">Logout</a>
+      </div>
+    </div>
+
+    <!-- Mobile hamburger -->
+    <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="/products" class="mobile-link">Products</a>
+    <form th:action="@{/search}" method="get" class="mobile-search">
+      <input type="text" name="query" placeholder="Search..." class="search-input"/>
+      <button type="submit" class="btn-primary-sm">Go</button>
+    </form>
+    <div sec:authorize="!isAuthenticated()">
+      <a href="/auth/login" class="mobile-link">Login</a>
+      <a href="/auth/signup" class="mobile-link">Sign Up</a>
+    </div>
+    <div sec:authorize="isAuthenticated()">
+      <span sec:authorize="hasRole('ADMIN')">
+        <a href="/admin" class="mobile-link">Admin Panel</a>
+      </span>
+      <a href="/auth/logout" class="mobile-link">Logout</a>
+    </div>
+  </div>
+</nav>
+
+</body>
+</html>

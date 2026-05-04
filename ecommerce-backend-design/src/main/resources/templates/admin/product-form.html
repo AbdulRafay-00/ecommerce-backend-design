@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title th:text="${editMode != null ? 'Edit Product' : 'Add Product'} + ' — ShopWave'">Product Form — ShopWave</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    .form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px;
+      max-width: 680px;
+    }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    @media(max-width:600px){ .form-row { grid-template-columns:1fr; } }
+
+    .img-preview {
+      margin-top: 10px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      max-height: 200px;
+    }
+    .img-preview img { width:100%; height:200px; object-fit:cover; }
+  </style>
+</head>
+<body>
+
+  <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+  <main class="container">
+    <div style="display:flex; align-items:center; gap:16px; margin-bottom:32px;">
+      <a href="/admin" class="btn-secondary">← Back</a>
+      <h1 class="section-title" style="margin:0;"
+          th:text="${editMode != null ? 'Edit Product' : 'Add New Product'}"></h1>
+    </div>
+
+    <div class="form-card">
+
+      <form th:action="${editMode != null ?
+                '/admin/products/update/' + productDto.id :
+                '/admin/products/save'}"
+            method="post"
+            th:object="${productDto}">
+
+        <div class="form-group">
+          <label class="form-label" for="name">Product Name *</label>
+          <input type="text" id="name" class="form-control"
+                 th:field="*{name}" placeholder="e.g. Wireless Headphones"/>
+          <div class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="price">Price (USD) *</label>
+            <input type="number" id="price" class="form-control"
+                   th:field="*{price}" placeholder="0.00" step="0.01" min="0.01"/>
+            <div class="field-error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="stock">Stock Quantity *</label>
+            <input type="number" id="stock" class="form-control"
+                   th:field="*{stock}" placeholder="0" min="0"/>
+            <div class="field-error" th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="category">Category *</label>
+          <input type="text" id="category" class="form-control"
+                 th:field="*{category}" placeholder="e.g. Electronics, Clothing, Accessories"
+                 list="category-list"/>
+          <!-- Suggest existing categories -->
+          <datalist id="category-list">
+            <option th:each="cat : ${categories}" th:value="${cat}"></option>
+          </datalist>
+          <div class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="imageUrl">Image URL</label>
+          <input type="url" id="imageUrl" class="form-control"
+                 th:field="*{imageUrl}" placeholder="https://..." oninput="previewImage(this.value)"/>
+          <div class="img-preview" id="imgPreview" th:if="${productDto.imageUrl != null && !productDto.imageUrl.isEmpty()}">
+            <img th:id="previewImg" th:src="${productDto.imageUrl}" alt="Preview"/>
+          </div>
+          <div class="img-preview" id="imgPreview" style="display:none;" th:unless="${productDto.imageUrl != null && !productDto.imageUrl.isEmpty()}">
+            <img id="previewImg" src="" alt="Preview"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="description">Description</label>
+          <textarea id="description" class="form-control"
+                    th:field="*{description}" placeholder="Describe the product..."></textarea>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:8px;">
+          <button type="submit" class="btn-primary"
+                  th:text="${editMode != null ? 'Update Product' : 'Save Product'}"></button>
+          <a href="/admin" class="btn-secondary">Cancel</a>
+        </div>
+
+      </form>
+    </div>
+  </main>
+
+  <script th:src="@{/js/app.js}"></script>
+  <script>
+    function previewImage(url) {
+      const preview = document.getElementById('imgPreview');
+      const img = document.getElementById('previewImg');
+      if (url && url.startsWith('http')) {
+        img.src = url;
+        preview.style.display = 'block';
+      } else {
+        preview.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>

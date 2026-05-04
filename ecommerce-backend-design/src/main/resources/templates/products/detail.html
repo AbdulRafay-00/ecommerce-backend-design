@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title th:text="${product.name} + ' — ShopWave'">Product — ShopWave</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+    .detail-img {
+      aspect-ratio: 1;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+    }
+    .detail-img img { width:100%; height:100%; object-fit:cover; }
+    .detail-info { padding-top: 8px; }
+    .detail-category {
+      font-size: 0.8rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .detail-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .detail-price {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+    .detail-desc {
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-bottom: 28px;
+      font-size: 0.97rem;
+    }
+    .detail-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 20px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+    }
+    .meta-row { display:flex; justify-content:space-between; font-size:0.9rem; }
+    .meta-label { color: var(--text-muted); }
+    .breadcrumb { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 32px; }
+    .breadcrumb a { color: var(--text-muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb span { margin: 0 8px; }
+
+    @media (max-width: 768px) {
+      .detail-grid { grid-template-columns: 1fr; gap: 24px; }
+      .detail-name { font-size: 1.5rem; }
+      .detail-price { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+  <main class="container">
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <a href="/">Home</a>
+      <span>›</span>
+      <a href="/products">Products</a>
+      <span>›</span>
+      <span th:text="${product.name}"></span>
+    </div>
+
+    <div class="detail-grid">
+      <!-- Product Image -->
+      <div class="detail-img">
+        <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/placeholder.png'}"
+             th:alt="${product.name}"/>
+      </div>
+
+      <!-- Product Info -->
+      <div class="detail-info">
+        <div class="detail-category" th:text="${product.category}"></div>
+        <h1 class="detail-name" th:text="${product.name}"></h1>
+        <div class="detail-price" th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}"></div>
+
+        <p class="detail-desc"
+           th:text="${product.description != null ? product.description : 'No description available.'}"></p>
+
+        <!-- Meta info -->
+        <div class="detail-meta">
+          <div class="meta-row">
+            <span class="meta-label">Category</span>
+            <span th:text="${product.category}"></span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Availability</span>
+            <span th:class="${product.inStock ? 'stock-badge in-stock' : 'stock-badge out-stock'}"
+                  th:text="${product.inStock ? 'In Stock (' + product.stock + ' left)' : 'Out of Stock'}"></span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Added</span>
+            <span th:text="${#temporals.format(product.createdAt, 'dd MMM yyyy')}"></span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <a href="/products" class="btn-secondary">← Back to Products</a>
+          <!-- Admin: edit/delete -->
+          <div sec:authorize="hasRole('ADMIN')" style="display:flex; gap:10px;">
+            <a th:href="@{/admin/products/edit/{id}(id=${product.id})}" class="btn-primary">Edit Product</a>
+            <form th:action="@{/admin/products/delete/{id}(id=${product.id})}" method="post">
+              <button type="submit" class="btn-danger confirm-delete">Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

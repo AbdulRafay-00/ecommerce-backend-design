@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title th:text="${searchQuery != null ? 'Search: ' + searchQuery + ' — ShopWave' : 'Products — ShopWave'}">Products — ShopWave</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+  <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+  <main class="container">
+
+    <!-- Page header -->
+    <div th:if="${searchQuery != null}">
+      <h1 class="section-title">
+        Results for "<span th:text="${searchQuery}" style="color:var(--accent)"></span>"
+      </h1>
+      <p class="section-subtitle"
+         th:text="${totalItems} + ' product(s) found'"></p>
+    </div>
+    <div th:if="${searchQuery == null}">
+      <h1 class="section-title">All Products</h1>
+      <p class="section-subtitle" th:text="${totalItems} + ' products available'"></p>
+    </div>
+
+    <!-- Category filter -->
+    <div class="category-filter" th:if="${searchQuery == null}">
+      <a href="/products"
+         th:classappend="${selectedCategory == null ? ' active' : ''}"
+         class="filter-btn">All</a>
+      <a th:each="cat : ${categories}"
+         th:href="@{/products(category=${cat})}"
+         th:text="${cat}"
+         th:classappend="${selectedCategory == cat ? ' active' : ''}"
+         class="filter-btn"></a>
+    </div>
+
+    <!-- Product grid -->
+    <div class="products-grid" th:if="${!#lists.isEmpty(products)}">
+      <div class="product-card" th:each="product : ${products}">
+        <a th:href="@{/products/{id}(id=${product.id})}">
+          <div class="product-img-wrap">
+            <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/placeholder.png'}"
+                 th:alt="${product.name}" loading="lazy"/>
+          </div>
+          <div class="product-info">
+            <div class="product-category" th:text="${product.category}"></div>
+            <div class="product-name" th:text="${product.name}"></div>
+            <div class="product-footer">
+              <span class="product-price" th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}"></span>
+              <span th:class="${product.inStock ? 'stock-badge in-stock' : 'stock-badge out-stock'}"
+                    th:text="${product.inStock ? 'In Stock' : 'Out of Stock'}"></span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div th:if="${#lists.isEmpty(products)}"
+         style="text-align:center; padding:80px 24px; color:var(--text-muted);">
+      <div style="font-size:3rem; margin-bottom:16px;">🔍</div>
+      <h3 style="font-family:'Syne',sans-serif; margin-bottom:8px;">No products found</h3>
+      <p>Try a different search or browse all categories.</p>
+      <a href="/products" class="btn-primary" style="margin-top:24px; display:inline-block;">Browse All</a>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" th:if="${totalPages > 1}">
+      <!-- Previous -->
+      <a th:href="${searchQuery != null ?
+            '/search?query=' + searchQuery + '&page=' + (currentPage - 1) :
+            selectedCategory != null ?
+            '/products?category=' + selectedCategory + '&page=' + (currentPage - 1) :
+            '/products?page=' + (currentPage - 1)}"
+         th:classappend="${currentPage == 0 ? ' disabled' : ''}"
+         class="page-btn">← Prev</a>
+
+      <!-- Page numbers -->
+      <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+        <a th:href="${searchQuery != null ?
+              '/search?query=' + searchQuery + '&page=' + i :
+              selectedCategory != null ?
+              '/products?category=' + selectedCategory + '&page=' + i :
+              '/products?page=' + i}"
+           th:text="${i + 1}"
+           th:classappend="${i == currentPage ? ' active' : ''}"
+           class="page-btn"></a>
+      </th:block>
+
+      <!-- Next -->
+      <a th:href="${searchQuery != null ?
+            '/search?query=' + searchQuery + '&page=' + (currentPage + 1) :
+            selectedCategory != null ?
+            '/products?category=' + selectedCategory + '&page=' + (currentPage + 1) :
+            '/products?page=' + (currentPage + 1)}"
+         th:classappend="${currentPage == totalPages - 1 ? ' disabled' : ''}"
+         class="page-btn">Next →</a>
+    </div>
+
+  </main>
+
+  <script th:src="@{/js/app.js}"></script>
+</body>
+</html>
