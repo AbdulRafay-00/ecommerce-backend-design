@@ -38,3 +38,4 @@ build/
 ### Environment ###
 application-local.properties
 ecommerce-backend-design/src/main/resources/application.properties
+ecommerce-backend-design\src\main\resources\application.properties
